@@ -1,0 +1,540 @@
+MERN Stack CRUD - Mongo Db, Express Js, React Js, Node Js
+
+url del VideoTutorial
+https://www.youtube.com/watch?v=8s_ZbPkPkRk&list=PL79dADJjZJU9SF6VCa4xfDyQM8jrVLU6c&index=9&t=886s
+
+*** Creamos un componente llamado ListaUsarios.js
+
+*** Creamos un componente llamado AgregarUsario.js
+
+*** Creamos un componente llamado EditarUsuario.js
+
+*** Creamos un componente llamado UsuarioIndividual.js
+
+** Adicionamos el componente UsuarioIndividual a ListaUsarios
+
+	const ListaUsuarios = () => {
+	  return (
+		<div>
+			<h2>Lista Usuarios</h2>
+			<UsuarioIndividual />
+		</div>
+	  )
+	}
+	
+*** Adicionamos los componentes al App.js
+
+	function App() {
+	  return (
+		<div className="App">
+		  <ListaUsuarios />
+		  <AgregarUsuario />
+		  <EditarUsuario />
+		</div>
+	  );
+	}
+
+*** Trabajando Rutas
+
+	** Instalamos el paquete React-Router-DOM
+	npm i react-router-dom
+	
+	** importamos el paquete para usarlo en el componente App
+	import {BrowserRouter, Routes, Route} from 'react-router-dom';
+	
+	** Creamos las Rutas adicionando el tag BrowserRouter en el App
+	
+	function App() {
+	  return (
+		<div className="App">
+		  <h1>Crud MERN STACK</h1>
+		  <BrowserRouter>
+			<Routes>
+				<Route></Route>
+			</Routes>
+		  </BrowserRouter>
+
+		  <ListaUsuarios />
+		  <AgregarUsuario />
+		  <EditarUsuario />
+		</div>
+	  );
+	}
+	
+	** Adicionamos las rutas de la aplicación en el nodo Route teniendo presente al final del tag colocar la palabra "exact"
+	
+	function App() {
+	  return (
+		<div className="App">
+		  <h1>Crud MERN STACK</h1>
+		  <BrowserRouter>
+			<Routes>
+			  <Route path='/' element={<ListaUsuarios />} exact></Route>
+			  <Route path='/agregarusuario' element={<AgregarUsuario />} exact></Route>
+			  <Route path='/editarusuario' element={<EditarUsuario />} exact></Route>
+			</Routes>
+		  </BrowserRouter>
+		</div>
+	  );
+	}
+	
+*** CREANDO El SERVIDOR NODE Y CONECTANDO A UNA BD MONGODB
+
+	** Creamos un archivo servidor.js
+	
+	** en la terminal en la carpeta raiz colocar el comando para inciiar un server nodejs
+	npm init
+	
+	** instalamos "express" con el comando
+	npm i express
+	
+	** en el archivo servidor.js adicionamos el siguiente codigo
+	
+	const express = require('express')
+	const app = express()
+
+	//confuración del servidor
+	app.listen(5000, function(){
+	   console.log('El servidor esta corriendo en el puerto 5000')
+	})
+	
+	
+	** iniciamos el servidor con el siguiente comando
+	node servidor.js
+	
+	** para no tener que reiniciar el server cada que hacemos un cambio en el servidor, instalamos la extensión nodemon
+	npm i -g nodemon
+	
+	** Ahora ejecutarmo el servidor utilizando el comando
+	nodemon servidor.js
+	
+	** Creamos en el servidor.js una funcion que permita ver un mensaje en el navegador para validar el funcionamiento del servidor
+	
+	app.get('/', (req, res) => {
+	   res.end('Bienvenidos al servidor NODE-JS')
+	})
+	
+*** MONGO DB   https://www.mongodb.com/try/download/community
+	
+	** Se instala mongodb y mongoCompass
+	
+	** instalamos una extensión para permitir la conexión entre el server NodeJS y la Apliación React "mongoose"
+	https://mongoosejs.com/
+	
+	npm i mongoose
+	
+	** Creamos la cadena de conexión en un archivo llamado "conexion.js"
+	
+	** Adicionamos el siguiente codigo en el cual nos vamos a conectar a una BDs llamada "crudmernstack"
+	
+	const mongoose = require('mongoose');
+	mongoose.connect('mongodb://localhost:27017/crudmernstack');
+
+	const objetobd = mongoose.connection
+
+	objetobd.on('connected', () => {
+		console.log('Se conecto a Mongo DB')
+	})
+
+	objetobd.on('error', () => {
+		console.log("Error al conectar con la BDs")
+	})
+	
+	** en el servidor JS importamos la conexion a mongodb
+		
+		const express = require('express')
+		const app = express()
+		const arvhivoBD = require('./conexion')
+
+	** validemos que el servidor se conecte correcamente
+	nodemon servidor.js
+	
+*** FRONT: mejorando la vista
+	
+	** instalamos bootstrap para el proyecto adicionando el script del CDN en el arhivo index.html en el HEAD
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	
+	** Adicionamos un navBar de bootstrap no olviden convertir el HTML ==>> ReactJSX  (https://magic.reactjs.net/htmltojsx.htm)
+	
+	** Configurar el navBar con las opciona "Inicio" y "Agregar Usuario"
+	
+	** Seguimos trabajando con el componente AgregarUsario generando un fomrulario para solicitar
+	- nombre
+	- email
+	- telefono
+	
+	** en el boton del fomrulario llamar a la funcion agregarUsuario de la siguiente manera
+	<button className='btln btn-success mt-3' onClick={agregarUsuario}>Guardar Usuario</button>
+	
+	** Generar la funcion al inicio del compoenente
+	const agregarUsuario = () => {}
+
+** En el BACK vamos a crear el esquema para la inserción de los usuarios
+	
+	* Crear en la raiz, una carpeta llamada rutas y dentro de ella un archivo usuario.js con el siguiente codigo
+
+	const express = require('express')
+	const router = express.Router
+
+	const mongoose = require('mongoose')
+	const esquema = mongoose.Schema
+
+	const esquemaUsuario = new esquema({
+		nombre: String,
+		email: String,
+		telefono: String,
+		idUsuario: String
+	})
+
+	const ModeloUsuario = mongoose.model('usuarios', esquemaUsuario)
+	module.exports = router
+	
+	**  en el servidor.js importamos la ruta que se acaba de crear
+	
+	const express = require('express')
+	const app = express()
+	const arvhivoBD = require('./conexion')
+
+	const rutaUsuario = require('./rutas/usuario')
+	...
+	
+	
+	** probemos una ruta para validar que el usuario responde de manera satisfactoria 
+	
+	* Creamos una ruta en el servidor.js para indicar cual es la ruta base de usuariuos 
+	app.use('/api/usuario', rutaUsuario)
+	
+	** en la ruta de usuario creamos un endPoint de la siguiente manera
+	router.get('/ejemplo', (req, res) => {
+		res.end('Hola mundo desde la ruta de usuarios')
+	})
+	
+	** probamos la ruta en el navegador  =>> http://localhost/api/usuario/ejemplo
+	
+*** En el componente AgregarUsuario vamos a captuar la información del formulario para guardar en la BDs
+	
+	** Adicionamos un useState para cada uno de los campos
+	const [nombre, setNombre] = React.useState('')
+	const [email, setEmail] = React.useState('')
+	const [telefono, setTelefono] = React.useState('')
+	
+	** se hace el bind con los values de los inputs del componente
+	<input type="text" className="form-control"  value={nombre}/>
+	
+	** adicionamos un evento onChange en los inputs para detectar los cambios del formluario usando una funcion flecha
+	<input type="text" className="form-control"  value={nombre} onChange={ (e) => {setNombre(e.target.value)}}/>
+	
+	** dentro de la funciona "agregarUsuario" definimos un objeto para usuario
+	const agregarUsuario = () => {
+		let usuario = {
+		  nombre: nombre,
+		  email: email,
+		  telefono: telefono
+		}
+	  }
+	
+	
+	** instalamo el modulo "uniqid" que permite manejar los ids para los objetos dentro de la aplicación React
+	npm i uniqid
+	
+	** En del objeto usuario definimos el id del usario con la ayuda de la extensión que se creo
+	let usuario = {
+      nombre: nombre,
+      email: email,
+      telefono: telefono,
+      idUsuario: uniquid()
+    }
+	
+	
+	** para acceder a los metodos del protocolo HTTP instalamos la extensión "axios" en la app REACT
+	npm i axios
+	
+	** llamamos el end point para adicionar el usuario por medio de axios
+	
+	const agregarUsuario = () => {
+		let usuario = {
+		  nombre: nombre,
+		  email: email,
+		  telefono: telefono,
+		  idUsuario: uniquid()
+		}
+		console.log(usuario)
+
+		axios.post('/api/usuario/agregarusuario', usuario)
+			
+	  }
+	  
+
+	  ** en el package.json de la app REACT adicionamos la ruta base del Backend declarando una función "proxy"
+
+	      "development": [
+		  "last 1 chrome version",
+		  "last 1 firefox version",
+		  "last 1 safari version"
+		]
+	  },
+	  "proxy":"http://localhost:5000/"
+	}
+	
+	** en el servidor de Back instalamos un modulo que permita acceder a los datos que son enviador desde la app REACT
+	npm i body-parser
+	
+	** lo importamos en le servidor.js
+	
+	const bodyParser = require('body-parser')
+	app.use(bodyParser.json())
+	app.use(bodyParser.urlencoded({extended: true}))
+	
+	
+	** para poder accceder a esta ruta para guardar la información, se debe crear la ruta nueva en el backend en el archivo de rutas de usuario
+	
+	router.post('/agregarusuario', (req, res) => {
+		const nuevousuario = new ModeloUsuario({
+			nombre: req.body.nombre,
+			email: req.body.email,
+			telefono: req.body.telefono,
+			idUsuario: req.body.idUsuario
+		})
+		nuevousuario.save( function(err){
+			if (!err)
+				res.send('usuario agregado correctamente')
+			else    
+				res.send(err)
+		})
+	})
+	
+	
+*** Vamos a ajustar el componente de lista de Usuarios
+
+	const ListaUsuarios = () => {
+	  const [dataUsuarios, setDataUsuarios] = useState([])
+
+	  useEffect(() => {
+		axios.get('api/usuario/obtenerusuarios')
+		  .then( res => {
+			console.log(res)
+		  })
+		  .catch( (err) => {
+			console.log(err)
+		  })
+	  }, [])
+
+	....
+	
+	** Adicionamos la ruta obtener usuarios en las rutas del servidor
+	router.get('/obtenerusuarios', (req, res) => {
+		ModeloUsuario.find({}, function(docs, err){
+			if (!err){
+				res.send(docs)
+			}else{
+				res.send(err)
+			}
+		})
+	})
+	
+	** En el componente ListaUsuarios, creamos una lista de usuarios para mostrarlos en el navegador
+	useEffect(() => {
+		axios.get('api/usuario/obtenerusuarios')
+		  .then( res => {
+			console.log(res)
+			setDataUsuarios(res.data)
+		  })
+		  .catch( (err) => {
+			console.log(err)
+		  })
+	  }, [])
+
+	  const listaUsuarios = dataUsuarios.map( usuario => {
+		return (
+		  <div>
+			<UsuarioIndividual usuario={usuario} />
+		  </div>
+		)
+	  })
+	  
+	  return (
+		<div>
+			<h2>Lista Usuarios</h2>
+			{listaUsuarios}
+		</div>
+	  )
+	  
+	  
+	** Modificamos el componte UsuarioIndividual
+	const UsuarioIndividual = ({usuario}) => {
+	  return (
+		<div>
+			<h2>
+				Usuario Individual
+			</h2>
+			<div className='container'>
+			  <div className='row'>
+				<div className='col-sm-6 offset-3'>
+				  <ul className='lsit-group'>
+					<li className='list-group-item'>{usuario.idUsuario}</li>
+					<li className='list-group-item'>{usuario.nombre}</li>
+					<li className='list-group-item'>{usuario.email}</li>
+					<li className='list-group-item'>{usuario.telefono}</li>
+				  </ul>
+				  <buton className='btn btn-info'>Editar</buton>
+				  <buton className='btn btn-danger'>Borrar</buton>
+				  <hr className='mt-4' />
+				</div>
+			  </div>
+
+			</div>
+		</div>
+	  )
+	}
+	 
+	 
+	** Adicionamos un link para la opción de editar los usuarios
+	
+	<Link  to={`/editarusuario/$usuario.idUsuario`}>
+		<li className='btn btn-info'>Editar</li>
+	</Link>
+	
+	** se debe importar Link del router-dom
+	import {Link} from 'react-router-dom'
+	
+	* Adicionar en las routes de BrowserRouter el parametro id en la ruta de editar
+	<Route path='/editarusuario/:idUsuario' element={<EditarUsuario />} exact></Route>
+	
+	* En el compomente EditarUsuario validamos que llegue correctamente el idUsuario
+	const EditarUsuario = () => {
+	  const params = useParams()
+
+	  return (
+		<div>
+		  <h2>Editar Usuario</h2>
+		  <h3>El id del usuario es: {params.idUsuario}</h3>
+		</div>
+	  )
+	}
+
+	* adicionamos el llamado con axios para hacer la consulta al back
+	const EditarUsuario = () => {
+	  const params = useParams()
+
+	  const [nombre, setNombre] = React.useState('')
+	  const [email, setEmail] = React.useState('')
+	  const [telefono, setTelefono] = React.useState('')
+
+	  useEffect(() => {
+		axios.post('/api/usuario/obtenerdatausuario', {idUsuario: params.idUsuario})
+		  .then( res => {
+			console.log(res.data)
+		  })
+	  }, [])
+	...
+	
+	* Creamos la ruta para hacerla consulta a la BDs en el Back 
+	router.post('/obtenerdatausuario', (req, res) => {
+		ModeloUsuario.find({idUsuario: req.body.idUsuario}, function(docs, err){
+			if (!err){
+				res.send(docs)
+			}else{
+				res.send(err)
+			}
+		})
+	})
+	
+	** Creamos un formulario para editar la información
+	se puede copiar el mismo formulario del compoenente AgregarUsario
+	
+	** PAra el boton colocar la etiqueta "Editar USuario"
+	
+	** creamos una funcion editarUsuario para el boton
+	const editarUsuario = () => {
+		let usuario = {
+		  nombre: nombre,
+		  email: email,
+		  telefono: telefono,
+		  idUsuario: params.idUsuario
+		}
+		console.log(usuario)
+		axios.post('/api/usuario/actualizarusuario', usuario)
+		  .then( res => {
+			console.log(res.data)
+			alert(res.data)
+		  })
+		  .catch( err => {
+			console.log(err)
+		  })
+	  }
+	  
+	** Creamos en el back la ruta para actualizar el usuario
+	router.post('/actualizarusuario', (req, res) => {
+		ModeloUsuario.findOneAndUpdate(
+			{idUsuario: req.body.idUsuario},
+			{
+				nombre: req.body.nombre,
+				email: req.body.email,
+				telefono: req.body.telefono,
+			}, (err) => {
+				if (!err){
+					res.send('usuario actualizado correctamente' + req.body.idUsuario)
+				}else{
+					res.send(err)
+				}
+			}
+		)
+	})
+	
+*** Eliminar Usuario
+	
+	** se puede hacer implemntentando en el boton una funcion 
+	
+	<li className='btn btn-danger' onClick={() => {borrarUsuario(usuario.idUsuario)}}>Borrar</li>
+	
+	* y dentro del componente implementar la funcion borrarUsuario
+	
+	const UsuarioIndividual = ({usuario}) => {
+
+	  const borrarUsuario =  (idUsuario) => {
+		axios.post('/api/usuario/borrarusuario', {idUsuario})
+		  .then( res => {
+			alert('usuario eliminado')
+		  })
+		  .catch( err  => {
+			console.log(`Error: ${err}`)
+		  })
+	  }
+
+	  return (
+	  ...
+	  
+	** Creamos en endPoint en el back para borrar el usuario
+	
+	router.post('/borrarusuario', (req, res) => {
+		ModeloUsuario.findOneAndDelete(
+			{idUsuario: req.body.idUsuario},
+			(err) => {
+				if (!err){
+					res.send('usuario borrado correctamente' + req.body.idUsuario)
+				}else{
+					res.send(err)
+				}
+			}
+		)
+	})
+	
+	** en el listado de Usuario refrescamos la vista por medio de useNavigate de router-dom
+	
+	* definimos una variable del tipo navigate
+	const navegar = useNavigate()
+	
+	* despues de hacer el borrado cargamos el listado de usuario
+	const borrarUsuario =  (idUsuario) => {
+		axios.post('/api/usuario/borrarusuario', {idUsuario})
+		  .then( res => {
+			alert('usuario eliminado')
+			navegar(0)
+		  })
+		  .catch( err  => {
+			console.log(`Error: ${err}`)
+		  })
+	  }
+
+	  return (
+	
